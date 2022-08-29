@@ -1,11 +1,17 @@
 import React, { Component } from 'react'
-import { Card, Button, Checkbox, Form, Input } from 'antd'
+import { Card, Button, Checkbox, Form, Input, message } from 'antd'
 import './index.scss'
 
 // img
 import logo from 'assets/logo.png'
 
+import { login } from 'api/user'
+
 export default class Login extends Component {
+  state = {
+    loading: false, // button loading
+  }
+  //
   render() {
     return (
       <div className="login">
@@ -79,7 +85,13 @@ export default class Login extends Component {
             </Form.Item>
 
             <Form.Item>
-              <Button type="primary" htmlType="submit" size="large" block>
+              <Button
+                type="primary"
+                htmlType="submit"
+                size="large"
+                loading={this.state.loading}
+                block
+              >
                 Submit
               </Button>
             </Form.Item>
@@ -90,7 +102,25 @@ export default class Login extends Component {
   }
 
   //   Confirm to login
-  onFinish = (values) => {
-    console.log(values)
+  onFinish = async ({ mobile, code }) => {
+    this.setState({
+      loading: true, // On loading
+    })
+
+    try {
+      const res = await login(mobile, code)
+      // reserve Token
+      localStorage.setItem('token', res.data.token)
+      this.props.history.push('/home')
+      this.setState({
+        loading: false, // Over loading
+      })
+      message.success('Success to login!', 1)
+    } catch (err) {
+      this.setState({
+        loading: false, // Over loading
+      })
+      message.warning(err.response.data.message, 1)
+    }
   }
 }
