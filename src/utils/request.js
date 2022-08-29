@@ -1,4 +1,14 @@
 import axios from 'axios'
+// Component
+import { message } from 'antd'
+// history(Router)
+import { createBrowserHistory } from 'history'
+import { hasToken, getToken, removeToken } from 'utils/storage'
+
+/**
+ * Url handler(history obj - Router)
+ */
+import history from './history'
 
 const instance = axios.create({
   baseURL: 'http://geek.itheima.net/v1_0/',
@@ -8,11 +18,14 @@ const instance = axios.create({
 // 添加请求拦截器
 instance.interceptors.request.use(
   function (config) {
-    // 在发送请求之前做些什么
+    // Token Setting
+    if (hasToken) {
+      config.headers.Authorization = `Bearer ${getToken()}`
+    }
+
     return config
   },
   function (error) {
-    // 对请求错误做些什么
     return Promise.reject(error)
   }
 )
@@ -24,7 +37,13 @@ instance.interceptors.response.use(
     return response.data
   },
   function (error) {
-    // 对响应错误做点什么
+    // Remove token
+    if (error.response.status === 401) {
+      removeToken()
+      message.warning('Token is timeout', 2)
+      history.push('/login')
+    }
+
     return Promise.reject(error)
   }
 )

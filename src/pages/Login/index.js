@@ -1,11 +1,14 @@
 import React, { Component } from 'react'
 import { Card, Button, Checkbox, Form, Input, message } from 'antd'
-import './index.scss'
+import style from './index.module.scss'
 
 // img
 import logo from 'assets/logo.png'
 
 import { login } from 'api/user'
+
+// utils
+import { setToken } from 'utils/storage'
 
 export default class Login extends Component {
   state = {
@@ -14,7 +17,7 @@ export default class Login extends Component {
   //
   render() {
     return (
-      <div className="login">
+      <div className={style.login}>
         <Card className="login-container">
           <img src={logo} className="login-logo" alt="" />
 
@@ -108,10 +111,17 @@ export default class Login extends Component {
     })
 
     try {
+      const { state } = this.props.location // url infomation
+
       const res = await login(mobile, code)
       // reserve Token
-      localStorage.setItem('token', res.data.token)
-      this.props.history.push('/home')
+      setToken(res.data.token)
+
+      // to url
+      state
+        ? this.props.history.push(state.from)
+        : this.props.history.push('/home')
+
       this.setState({
         loading: false, // Over loading
       })
