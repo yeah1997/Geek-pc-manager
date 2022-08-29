@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom'
 // css
 import 'antd/dist/antd.css'
-import './index.css'
+import 'index.scss'
 // Component
 import App from './App'
 
