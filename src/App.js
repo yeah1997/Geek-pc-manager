@@ -1,4 +1,4 @@
-import { Router, Route, Link, Switch } from 'react-router-dom'
+import { Router, Route, Switch, Redirect } from 'react-router-dom'
 // Route
 import AuthRoute from 'components/AuthRoute'
 // component
@@ -14,6 +14,7 @@ function App() {
   return (
     <Router history={history}>
       <div className="App">
+        <Redirect exact from="/" to="/home"></Redirect>
         <Switch>
           <AuthRoute path="/home" component={Layout}></AuthRoute>
           <Route path="/login" component={Login}></Route>

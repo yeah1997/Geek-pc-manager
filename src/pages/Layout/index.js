@@ -19,6 +19,8 @@ import Home from 'pages/Home'
 import ArticleList from 'pages/ArticleList'
 import ArticlePublish from 'pages/ArticlePublish'
 
+import { Radio } from 'antd'
+
 // api
 import { getUserProfile } from 'api/user'
 
@@ -38,6 +40,19 @@ export default class LayoutComponent extends Component {
         <Layout>
           <Header className="header">
             <div className="logo" />
+
+            {/* <div>
+              <span style={{ marginRight: 16, color: '#fff' }}>
+                Change locale of components:{' '}
+              </span>
+              <Radio.Group>
+                <Radio.Button size="small" key="en">
+                  English
+                </Radio.Button>
+                <Radio.Button key="cn">中文</Radio.Button>
+              </Radio.Group>
+            </div> */}
+
             <div className="proile">
               <span>{this.state.profile.name}</span>
               <span>
@@ -61,18 +76,18 @@ export default class LayoutComponent extends Component {
                 style={{ height: '100%', borderRight: 0 }}
               >
                 <Menu.Item key="/home" icon={<HomeOutlined />}>
-                  <Link to="/home"> 数据概览</Link>
+                  <Link to="/home"> Home</Link>
                 </Menu.Item>
 
                 <Menu.Item key="/home/list" icon={<DiffOutlined />}>
-                  <Link to="/home/list">内容管理</Link>
+                  <Link to="/home/list">Article List</Link>
                 </Menu.Item>
                 <Menu.Item key="/home/publish" icon={<EditOutlined />}>
-                  <Link to="/home/publish">发布文章</Link>
+                  <Link to="/home/publish">Article Publish</Link>
                 </Menu.Item>
               </Menu>
             </Sider>
-            <Layout style={{ padding: '12px' }}>
+            <Layout style={{ padding: '12px', overflow: 'auto' }}>
               <Content className="site-layout-background">
                 {/* Switch Router */}
                 <Switch>
