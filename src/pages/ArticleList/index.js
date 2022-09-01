@@ -13,8 +13,14 @@ import {
   Table,
   Tag,
   Space,
+  Modal,
+  message,
 } from 'antd'
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import {
+  DeleteOutlined,
+  EditOutlined,
+  ExclamationCircleOutlined,
+} from '@ant-design/icons'
 
 // Router
 import { Link } from 'react-router-dom'
@@ -22,13 +28,14 @@ import { Link } from 'react-router-dom'
 // API
 import { ArticleStatus } from 'api/constant'
 import { getChannels } from 'api/channel'
-import { getArticles } from 'api/article'
+import { getArticles, delArticle } from 'api/article'
 
 // assets
 import defaultImg from 'assets/error.png'
 
 // Inner Component
 const { Option } = Select
+const { confirm } = Modal
 
 export default class ArticleList extends Component {
   state = {
@@ -94,7 +101,7 @@ export default class ArticleList extends Component {
     },
     {
       title: '操作',
-      render(data) {
+      render: (data) => {
         return (
           <>
             <Space>
@@ -105,6 +112,7 @@ export default class ArticleList extends Component {
                 danger
                 shape="circle"
                 icon={<DeleteOutlined />}
+                onClick={() => this.handleDelete(data.id)}
               />
             </Space>
           </>
@@ -138,7 +146,7 @@ export default class ArticleList extends Component {
               </Radio.Group>
             </Form.Item>
 
-            <Form.Item label="频道" name="Channel">
+            <Form.Item label="频道" name="channel_id">
               <Select style={{ width: 200 }} placeholder="Please choose one">
                 {this.state.channels.map((item) => (
                   <Option key={item.id} value={item.id}>
@@ -154,7 +162,7 @@ export default class ArticleList extends Component {
 
             {/* Confirm */}
             <Form.Item>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" size="small">
                 Confirm
               </Button>
             </Form.Item>
@@ -195,6 +203,7 @@ export default class ArticleList extends Component {
   // Load channel list
   async getChannelList() {
     const { data } = await getChannels()
+
     this.setState({
       channels: data.channels,
     })
@@ -206,7 +215,50 @@ export default class ArticleList extends Component {
     this.getArticleList(this.pageParams)
   }
 
+  // funciton for confirm
   onFinish = (val) => {
-    console.log(val)
+    const { status, channel_id, date } = val
+
+    if (status !== -1) {
+      this.pageParams.status = status
+    } else {
+      delete this.pageParams.status
+    }
+
+    if (channel_id !== undefined) {
+      this.pageParams.channel_id = channel_id
+    } else {
+      delete this.pageParams.channel_id
+    }
+
+    if (date) {
+      this.pageParams.begin_pubdate = date[0]
+        .startOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+      this.pageChange.end_pubdate = date[1]
+        .endOf('day')
+        .format('YYYY-MM-DD HH:mm:ss')
+    } else {
+      delete this.pageParams.begin_pubdate
+      delete this.pageParams.end_pubdate
+    }
+    // reset to fist page
+    this.pageParams.page = 1
+    this.getArticleList()
+  }
+
+  handleDelete = (id) => {
+    confirm({
+      title: 'Do you want to delete these items?',
+      icon: <ExclamationCircleOutlined />,
+      content:
+        'When clicked the OK button, this dialog will be closed after 1 second',
+      onOk: async () => {
+        await delArticle(id)
+        this.getArticleList()
+        message.success('Delete is completed!')
+      },
+      onCancel() {},
+    })
   }
 }

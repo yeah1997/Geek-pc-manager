@@ -14,8 +14,8 @@ function App() {
   return (
     <Router history={history}>
       <div className="App">
-        <Redirect exact from="/" to="/home"></Redirect>
         <Switch>
+          <Redirect exact from="/" to="/home"></Redirect>
           <AuthRoute path="/home" component={Layout}></AuthRoute>
           <Route path="/login" component={Login}></Route>
         </Switch>
