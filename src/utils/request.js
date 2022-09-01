@@ -10,8 +10,10 @@ import { hasToken, getToken, removeToken } from 'utils/storage'
  */
 import history from './history'
 
+export const BASE_URL = 'http://geek.itheima.net/v1_0/'
+
 const instance = axios.create({
-  baseURL: 'http://geek.itheima.net/v1_0/',
+  baseURL: BASE_URL,
   timeout: 5000,
 })
 
@@ -38,6 +40,12 @@ instance.interceptors.response.use(
   },
   function (error) {
     // Remove token
+    if (!error.response) {
+      // Time out
+      message.error('网络繁忙')
+      return Promise.reject('网络繁忙!')
+    }
+
     if (error.response.status === 401) {
       removeToken()
       message.warning('Token is timeout', 2)

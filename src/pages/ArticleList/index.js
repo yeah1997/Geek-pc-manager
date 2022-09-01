@@ -8,7 +8,6 @@ import {
   Form,
   Radio,
   Button,
-  Select,
   DatePicker,
   Table,
   Tag,
@@ -27,14 +26,15 @@ import { Link } from 'react-router-dom'
 
 // API
 import { ArticleStatus } from 'api/constant'
-import { getChannels } from 'api/channel'
 import { getArticles, delArticle } from 'api/article'
 
 // assets
 import defaultImg from 'assets/error.png'
 
+// self Component
+import Channel from 'components/Channel'
+
 // Inner Component
-const { Option } = Select
 const { confirm } = Modal
 
 export default class ArticleList extends Component {
@@ -147,13 +147,7 @@ export default class ArticleList extends Component {
             </Form.Item>
 
             <Form.Item label="频道" name="channel_id">
-              <Select style={{ width: 200 }} placeholder="Please choose one">
-                {this.state.channels.map((item) => (
-                  <Option key={item.id} value={item.id}>
-                    {item.name}
-                  </Option>
-                ))}
-              </Select>
+              <Channel value></Channel>
             </Form.Item>
 
             <Form.Item label="日期" name="date">
@@ -188,7 +182,6 @@ export default class ArticleList extends Component {
   }
 
   componentDidMount() {
-    this.getChannelList()
     this.getArticleList()
   }
 
@@ -197,15 +190,6 @@ export default class ArticleList extends Component {
     const { data } = await getArticles(this.pageParams)
     this.setState({
       articles: data,
-    })
-  }
-
-  // Load channel list
-  async getChannelList() {
-    const { data } = await getChannels()
-
-    this.setState({
-      channels: data.channels,
     })
   }
 

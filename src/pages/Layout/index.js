@@ -107,7 +107,11 @@ export default class LayoutComponent extends Component {
     )
   }
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.loadUserProfile()
+  }
+
+  async loadUserProfile() {
     const { data } = await getUserProfile()
     this.setState({
       profile: data,
