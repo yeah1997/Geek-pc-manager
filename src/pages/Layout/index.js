@@ -1,5 +1,5 @@
 // React
-import React, { Component } from 'react'
+import React, { Component, Suspense } from 'react'
 import { Switch, Route, Link } from 'react-router-dom'
 
 // Frame work
@@ -15,9 +15,9 @@ import {
 import styles from 'pages/Layout/index.module.scss'
 
 // Component
-import Home from 'pages/Home'
-import ArticleList from 'pages/ArticleList'
-import ArticlePublish from 'pages/ArticlePublish'
+// import Home from 'pages/Home'
+// import ArticleList from 'pages/ArticleList'
+// import ArticlePublish from 'pages/ArticlePublish'
 
 import { Radio } from 'antd'
 
@@ -29,9 +29,28 @@ import { removeToken } from 'utils/storage'
 
 const { Header, Content, Sider } = Layout
 
+// Lazy Component
+const Home = React.lazy(() => import('pages/Home'))
+const ArticleList = React.lazy(() => import('pages/ArticleList'))
+const ArticlePublish = React.lazy(() => import('pages/ArticlePublish'))
+
 export default class LayoutComponent extends Component {
   state = {
     profile: {},
+    selectedKey: this.props.location.pathname,
+  }
+
+  componentDidUpdate(prevProps) {
+    let pathname = this.props.location.pathname
+
+    if (pathname !== prevProps.location.pathname) {
+      if (pathname.startsWith('/home/publish')) {
+        pathname = '/home/publish'
+      }
+      this.setState({
+        selectedKey: pathname,
+      })
+    }
   }
 
   render() {
@@ -72,7 +91,7 @@ export default class LayoutComponent extends Component {
               <Menu
                 mode="inline"
                 theme="dark"
-                defaultSelectedKeys={[this.props.location.pathname]}
+                selectedKeys={[this.state.selectedKey]}
                 style={{ height: '100%', borderRight: 0 }}
               >
                 <Menu.Item key="/home" icon={<HomeOutlined />}>
@@ -90,14 +109,23 @@ export default class LayoutComponent extends Component {
             <Layout style={{ padding: '12px', overflow: 'auto' }}>
               <Content className="site-layout-background">
                 {/* Switch Router */}
-                <Switch>
-                  <Route exact path="/home" component={Home}></Route>
-                  <Route path="/home/list" component={ArticleList}></Route>
-                  <Route
-                    path="/home/publish"
-                    component={ArticlePublish}
-                  ></Route>
-                </Switch>
+                <Suspense fallback={<div>Loading...</div>}>
+                  <Switch>
+                    <Route exact path="/home" component={Home}></Route>
+                    <Route path="/home/list" component={ArticleList}></Route>
+                    <Route
+                      exact
+                      path="/home/publish"
+                      component={ArticlePublish}
+                      key="add"
+                    ></Route>
+                    <Route
+                      path="/home/publish/:id"
+                      component={ArticlePublish}
+                      key="edit"
+                    ></Route>
+                  </Switch>
+                </Suspense>
                 {/* Switch Router */}
               </Content>
             </Layout>

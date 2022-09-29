@@ -105,7 +105,12 @@ export default class ArticleList extends Component {
         return (
           <>
             <Space>
-              <Button type="primary" shape="circle" icon={<EditOutlined />} />
+              <Button
+                type="primary"
+                shape="circle"
+                icon={<EditOutlined />}
+                onClick={() => this.handleEdit(data.id)}
+              />
 
               <Button
                 type="primary"
@@ -229,6 +234,10 @@ export default class ArticleList extends Component {
     // reset to fist page
     this.pageParams.page = 1
     this.getArticleList()
+  }
+
+  handleEdit = (id) => {
+    this.props.history.push(`/home/publish/${id}`)
   }
 
   handleDelete = (id) => {

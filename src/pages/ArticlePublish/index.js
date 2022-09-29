@@ -27,7 +27,7 @@ import { BASE_URL } from 'utils/request'
 // style
 import style from 'pages/ArticlePublish/index.module.scss'
 
-import { addArticle } from 'api/article'
+import { addArticle, getArticleById, updateArticle } from 'api/article'
 
 export default class ArticlePublish extends Component {
   state = {
@@ -36,12 +36,26 @@ export default class ArticlePublish extends Component {
     fileList: [],
     isShowPreview: false,
     preveiwUrl: '',
+    id: this.props.match.params.id,
   }
 
   formRef = React.createRef()
 
+  async componentDidMount() {
+    if (this.state.id) {
+      const { data } = await getArticleById(this.state.id)
+      this.formRef.current.setFieldsValue({ ...data, type: data.cover.type })
+      this.setState({
+        fileList: data.cover.images.map((item) => {
+          return { url: item }
+        }),
+        type: data.cover.type,
+      })
+    }
+  }
+
   render() {
-    const { fileList, type, isShowPreview, preveiwUrl } = this.state
+    const { fileList, type, isShowPreview, preveiwUrl, id } = this.state
     return (
       <div className={style.publish}>
         <Card
@@ -50,7 +64,7 @@ export default class ArticlePublish extends Component {
               <Breadcrumb.Item>
                 <Link to="/home">Home</Link>
               </Breadcrumb.Item>
-              <Breadcrumb.Item>Article Publish</Breadcrumb.Item>
+              <Breadcrumb.Item>{id ? '编辑文章' : '发布文章'}</Breadcrumb.Item>
             </Breadcrumb>
           }
         >
@@ -115,7 +129,7 @@ export default class ArticlePublish extends Component {
             <Form.Item wrapperCol={{ offset: 3 }}>
               <Space>
                 <Button type="primary" htmlType="submit" size="large">
-                  发布文章
+                  {id ? '编辑文章' : '发布文章'}
                 </Button>
                 <Button size="large" onClick={this.addDraft}>
                   存入草稿
@@ -175,9 +189,6 @@ export default class ArticlePublish extends Component {
   addDraft = async () => {
     const formData = await this.formRef.current.validateFields()
     this.confirmForm(formData, true)
-
-    message.success('Success add a draft')
-    this.props.history.push('/home')
   }
 
   handleCancle = () => {
@@ -189,7 +200,7 @@ export default class ArticlePublish extends Component {
   }
 
   async confirmForm(value, draft) {
-    const { fileList, type } = this.state
+    const { fileList, type, id } = this.state
 
     if (fileList.length !== type) {
       return message.warn('数量不正确')
@@ -199,23 +210,39 @@ export default class ArticlePublish extends Component {
       return item.url || item.response.data.url
     })
 
-    await addArticle(
-      {
-        ...value,
-        cover: {
-          type,
-          images,
+    if (id) {
+      await await updateArticle(
+        {
+          ...value,
+          cover: {
+            type,
+            images,
+          },
+          id,
         },
-      },
-      draft
-    )
+        draft
+      )
+      message.success('Success edit a draft')
+    } else {
+      await addArticle(
+        {
+          ...value,
+          cover: {
+            type,
+            images,
+          },
+        },
+        draft
+      )
+      message.success('Success add a draft')
+    }
+
+    this.props.history.push('/home')
   }
 
   // publish
   onFinish = async (value) => {
     this.confirmForm(value, false)
-    message.success('Success add a article')
-    this.props.history.push('/home')
   }
 
   changeType = (e) => {
